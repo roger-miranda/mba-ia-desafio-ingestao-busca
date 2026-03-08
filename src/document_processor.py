@@ -180,6 +180,43 @@ def store_embeddings_in_pgvector(
 
         embedding_function = ProviderEmbeddingsWrapper(ai_provider)
 
+        # IMPORTANT: Clean existing data before inserting new embeddings
+        # This prevents data accumulation across multiple ingestions
+        print(f"🗑️  Cleaning existing data from collection '{collection_name}'...")
+        import psycopg2
+
+        try:
+            conn = psycopg2.connect(db_url)
+            cur = conn.cursor()
+
+            # Count existing embeddings before cleanup
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM langchain_pg_embedding
+                WHERE collection_id = (SELECT uuid FROM langchain_pg_collection WHERE name = %s);
+            """, (collection_name,))
+
+            existing_count = cur.fetchone()[0]
+            if existing_count > 0:
+                print(f"   ⚠️  Found {existing_count} existing embeddings - removing them")
+
+                # Delete existing embeddings for this collection
+                cur.execute("""
+                    DELETE FROM langchain_pg_embedding
+                    WHERE collection_id = (SELECT uuid FROM langchain_pg_collection WHERE name = %s);
+                """, (collection_name,))
+
+                conn.commit()
+                print(f"   ✓ Removed {existing_count} old embeddings")
+            else:
+                print(f"   ✓ Collection is clean (no existing embeddings)")
+
+            cur.close()
+            conn.close()
+
+        except Exception as cleanup_error:
+            print(f"   ⚠️  Cleanup warning (continuing anyway): {cleanup_error}")
+
         # Create PGVector store from pre-computed embeddings
         # The from_embeddings method stores already-computed embeddings
         # It expects a list of tuples of (text, embedding_vector)

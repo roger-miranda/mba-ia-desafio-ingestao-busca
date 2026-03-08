@@ -115,64 +115,40 @@ def retrieve_similar_chunks(
             embeddings=embedding_function,
         )
 
-        # Format results - manually search using the embedding vector
-        # For direct embedding search, we need to use the underlying connection
-        try:
-            # Alternative: use similarity_search which takes a query string
-            # but we have an embedding vector, so we'll format results differently
-            import psycopg2
-            from pgvector.psycopg2 import register_vector
+        # Use direct SQL query for similarity search - this is more reliable
+        import psycopg2
+        from pgvector.psycopg2 import register_vector
 
-            register_vector(None)
+        conn = psycopg2.connect(db_url)
+        register_vector(conn)
+        cur = conn.cursor()
 
-            # Get raw connection to execute custom query with the embedding vector
-            conn = psycopg2.connect(db_url)
-            cur = conn.cursor()
+        # Query pgVector for similarity search with our embedding
+        cur.execute(
+            """
+            SELECT document, 1 - (embedding <=> %s::vector) as similarity, cmetadata
+            FROM langchain_pg_embedding
+            WHERE collection_id = (SELECT uuid FROM langchain_pg_collection WHERE name = %s)
+            ORDER BY embedding <=> %s::vector
+            LIMIT %s
+            """,
+            (question_embedding, collection_name, question_embedding, k),
+        )
 
-            # Query pgVector for similarity search with our embedding
-            cur.execute(
-                f"""
-                SELECT document, 1 - (embedding <=> %s::vector) as similarity, metadata
-                FROM langchain_pg_embedding
-                WHERE collection_id = (SELECT uuid FROM langchain_pg_collection WHERE name = %s)
-                ORDER BY embedding <=> %s::vector
-                LIMIT %s
-                """,
-                (question_embedding, collection_name, question_embedding, k),
-            )
+        retrieved_chunks = []
+        for row in cur.fetchall():
+            chunk = {
+                "text": row[0],
+                "score": row[1],
+                "metadata": row[2] if row[2] else {},
+            }
+            retrieved_chunks.append(chunk)
 
-            retrieved_chunks = []
-            for row in cur.fetchall():
-                chunk = {
-                    "text": row[0],
-                    "score": row[1],
-                    "metadata": row[2] if row[2] else {},
-                }
-                retrieved_chunks.append(chunk)
+        cur.close()
+        conn.close()
 
-            cur.close()
-            conn.close()
-
-            logger.debug(f"✓ Retrieved {len(retrieved_chunks)} similar chunks from database")
-            return retrieved_chunks
-
-        except Exception as e:
-            # Fallback: use similarity_search if direct query fails
-            logger.debug(f"Direct embedding search failed, using fallback: {e}")
-            # This will search based on query string similarity
-            results_with_scores = vectorstore.similarity_search_with_score("", k=k)
-
-            retrieved_chunks = []
-            for doc, score in results_with_scores:
-                chunk = {
-                    "text": doc.page_content,
-                    "score": score,
-                    "metadata": doc.metadata if doc.metadata else {},
-                }
-                retrieved_chunks.append(chunk)
-
-            logger.debug(f"✓ Retrieved {len(retrieved_chunks)} similar chunks (fallback method)")
-            return retrieved_chunks
+        logger.debug(f"✓ Retrieved {len(retrieved_chunks)} similar chunks from database")
+        return retrieved_chunks
 
     except Exception as e:
         error_msg = f"Error retrieving similar chunks from database: {e}"
@@ -279,11 +255,15 @@ def orchestrate_search(
 
         # Step 2: Retrieve similar chunks
         retrieved_chunks = retrieve_similar_chunks(
-            question_embedding, db_url, collection_name, ai_provider, k=10
+            question_embedding, db_url, collection_name, ai_provider, k=35
         )
 
+        print(f"✓ Retrieved {len(retrieved_chunks)} relevant chunks from database")
+        for chunk in retrieved_chunks:
+            print(f"   - Chunk score: {chunk['score']:.4f}, text preview: {chunk['text'][:50]}...")  
+
         # Step 3: Format context
-        context = format_context(retrieved_chunks)        
+        context = format_context(retrieved_chunks)
 
         logger.debug("✓ Semantic search pipeline completed successfully")
         return context
