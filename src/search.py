@@ -25,65 +25,57 @@ PERGUNTA DO USUÁRIO:
 RESPONDA A "PERGUNTA DO USUÁRIO"
 """
 
-def search_prompt(question=None):
+def search_prompt(user_question: str, ai_provider_instance=None) -> str:
     """
-    Orchestrator function that returns a callable chain for search and response.
+    Execute the complete search and response pipeline.
 
-    This function bridges the retrieval and LLM generation layers, returning a
-    callable that accepts a question and returns a response text by orchestrating:
+    This function bridges the retrieval and LLM generation layers by orchestrating:
     1. Semantic search to retrieve relevant chunks
     2. LLM response generation based on retrieved context
 
     Args:
-        question: Optional question for testing (not used in normal flow)
+        user_question: The user's question to process
+        ai_provider_instance: AI provider instance to use (optional, creates one if None)
 
     Returns:
-        A callable function that takes (question) and returns (response_text)
+        The final response text to display to the user
     """
     from src.retrieval import orchestrate_search
     from src.llm_response import orchestrate_response
-    from src.config import load_config, get_active_provider
+    from src.config import load_config
+    from src.providers import get_ai_provider
     import logging
 
     logger = logging.getLogger(__name__)
 
-    def search_and_respond(user_question: str) -> str:
-        """
-        Inner function that executes the complete search and response pipeline.
+    try:
+        # Load configuration to get database settings
+        config = load_config()
+        db_url = config.get("DATABASE_URL")
+        collection_name = config.get("PG_VECTOR_COLLECTION_NAME")
 
-        Args:
-            user_question: The user's question to process
+        # Use provided provider instance or create one silently (without logs)
+        if ai_provider_instance is None:
+            ai_provider_instance = get_ai_provider(None, config, use_fallback=True, log_selection=False)
 
-        Returns:
-            The final response text to display to the user
-        """
-        try:
-            # Load configuration to get database and provider settings
-            config = load_config()
-            provider = get_active_provider()
-            db_url = config.get("DATABASE_URL")
-            collection_name = config.get("PG_VECTOR_COLLECTION_NAME")
+        # Step 1: Retrieve relevant chunks from vector database
+        search_results = orchestrate_search(
+            question=user_question,
+            ai_provider=ai_provider_instance,
+            db_url=db_url,
+            collection_name=collection_name
+        )
 
-            # Step 1: Retrieve relevant chunks from vector database
-            search_results = orchestrate_search(
-                question=user_question,
-                provider=provider,
-                db_url=db_url,
-                collection_name=collection_name
-            )
+        # Step 2: Generate response from retrieved context
+        response = orchestrate_response(
+            question=user_question,
+            context=search_results,
+            ai_provider=ai_provider_instance
+        )
 
-            # Step 2: Generate response from retrieved context
-            response = orchestrate_response(
-                question=user_question,
-                context=search_results,
-                provider=provider
-            )
+        return response
 
-            return response
-
-        except Exception as e:
-            logger.error(f"Error in search_prompt orchestration: {e}")
-            # Return user-friendly error message
-            return f"Não tenho informações necessárias para responder sua pergunta."
-
-    return search_and_respond
+    except Exception as e:
+        logger.error(f"Error in search_prompt orchestration: {e}")
+        # Return user-friendly error message
+        return f"Não tenho informações necessárias para responder sua pergunta."

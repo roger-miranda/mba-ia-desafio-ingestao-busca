@@ -9,9 +9,6 @@ This module provides utilities for:
 
 import logging
 from typing import List, Dict, Optional
-from src.config import load_config, get_active_provider
-from langchain_openai import OpenAIEmbeddings
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_postgres.vectorstores import PGVector
 
 # Configure logging
@@ -19,19 +16,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def query_embeddings(question: str, provider: str) -> List[float]:
+def query_embeddings(question: str, ai_provider) -> List[float]:
     """
     Convert user question to embedding vector using the same embedding model as document chunks.
 
-    Generates an embedding for the user's question using either OpenAI or Google
-    Generative AI providers, matching the embedding model used during document ingestion.
+    Uses the AI provider abstraction to generate embeddings, ensuring consistency
+    with the model used during document ingestion.
 
     Args:
         question: The user's question text to embed
-        provider: Either "openai" or "google" to specify which embedding provider to use
+        ai_provider: AI provider instance to use for embedding generation
 
     Returns:
-        List of floats representing the embedding vector (1536 dims for OpenAI, 768 for Google)
+        List of floats representing the embedding vector
 
     Raises:
         ValueError: If question is empty, provider is invalid, or API call fails
@@ -39,37 +36,15 @@ def query_embeddings(question: str, provider: str) -> List[float]:
     if not question or not question.strip():
         raise ValueError("Question cannot be empty")
 
-    if provider not in ("openai", "google"):
-        raise ValueError(f'Invalid provider: "{provider}". Must be "openai" or "google".')
-
     try:
-        config = load_config()
-
-        if provider == "openai":
-            # Create OpenAI embeddings with optional custom base URL
-            openai_kwargs = {
-                "model": config["OPENAI_EMBEDDING_MODEL"],
-                "api_key": config["OPENAI_API_KEY"],
-            }
-            if config.get("OPENAI_BASE_URL"):
-                openai_kwargs["base_url"] = config["OPENAI_BASE_URL"]
-
-            embeddings = OpenAIEmbeddings(**openai_kwargs)
-        else:  # provider == "google"
-            # Create Google embeddings
-            google_kwargs = {
-                "model": config["GOOGLE_EMBEDDING_MODEL"],
-                "google_api_key": config["GOOGLE_API_KEY"],
-            }
-            embeddings = GoogleGenerativeAIEmbeddings(**google_kwargs)
-
         # Generate embedding for the question
-        embedding_vector = embeddings.embed_query(question)
+        embedding_vector = ai_provider.embed_query(question)
 
         if not embedding_vector:
             raise ValueError("Failed to generate embedding for question")
 
-        logger.debug(f"✓ Generated embedding for question ({len(embedding_vector)} dimensions)")
+        logger.debug(f"✓ Generated embedding for question using {ai_provider.get_provider_name()} "
+                    f"({len(embedding_vector)} dimensions)")
         return embedding_vector
 
     except Exception as e:
@@ -79,7 +54,7 @@ def query_embeddings(question: str, provider: str) -> List[float]:
 
 
 def retrieve_similar_chunks(
-    question_embedding: List[float], db_url: str, collection_name: str, k: int = 10
+    question_embedding: List[float], db_url: str, collection_name: str, ai_provider, k: int = 10
 ) -> List[Dict]:
     """
     Retrieve k most relevant chunks from PostgreSQL using semantic similarity search.
@@ -91,6 +66,7 @@ def retrieve_similar_chunks(
         question_embedding: The embedding vector for the user's question
         db_url: PostgreSQL connection URL
         collection_name: Name of the vector collection to search
+        ai_provider: AI provider instance to use for embedding operations
         k: Number of results to retrieve (default: 10 per SEARCH-02 requirement)
 
     Returns:
@@ -115,37 +91,28 @@ def retrieve_similar_chunks(
         raise ValueError("k must be a positive integer")
 
     try:
-        config = load_config()
-        provider = get_active_provider()
+        # Create a LangChain embeddings wrapper for PGVector compatibility
+        from langchain_core.embeddings import Embeddings
 
-        # Create embedding function for PGVector based on provider
-        if provider == "openai":
-            openai_kwargs = {
-                "model": config["OPENAI_EMBEDDING_MODEL"],
-                "api_key": config["OPENAI_API_KEY"],
-            }
-            if config.get("OPENAI_BASE_URL"):
-                openai_kwargs["base_url"] = config["OPENAI_BASE_URL"]
+        class ProviderEmbeddingsWrapper(Embeddings):
+            """Wrapper to make our AiProvider compatible with LangChain's PGVector."""
 
-            embedding_function = OpenAIEmbeddings(**openai_kwargs)
-        else:  # provider == "google"
-            google_kwargs = {
-                "model": config["GOOGLE_EMBEDDING_MODEL"],
-                "google_api_key": config["GOOGLE_API_KEY"],
-            }
-            embedding_function = GoogleGenerativeAIEmbeddings(**google_kwargs)
+            def __init__(self, ai_provider):
+                self.ai_provider = ai_provider
+
+            def embed_documents(self, texts):
+                return self.ai_provider.embed_documents(texts)
+
+            def embed_query(self, text):
+                return self.ai_provider.embed_query(text)
+
+        embedding_function = ProviderEmbeddingsWrapper(ai_provider)
 
         # Create PGVector store connection
         vectorstore = PGVector(
             collection_name=collection_name,
             connection=db_url,
             embeddings=embedding_function,
-        )
-
-        # Perform similarity search with scores
-        results = vectorstore.similarity_search_with_score(
-            query="",  # Empty query - we're using the embedding directly
-            k=k,
         )
 
         # Format results - manually search using the embedding vector
@@ -275,7 +242,7 @@ def format_context(retrieved_chunks: List[Dict]) -> str:
 
 
 def orchestrate_search(
-    question: str, provider: str, db_url: str, collection_name: str
+    question: str, ai_provider, db_url: str, collection_name: str
 ) -> str:
     """
     Execute complete semantic search pipeline from question to formatted context.
@@ -285,7 +252,7 @@ def orchestrate_search(
 
     Args:
         question: The user's question
-        provider: Either "openai" or "google"
+        ai_provider: AI provider instance to use for embedding operations
         db_url: PostgreSQL connection URL
         collection_name: Name of the vector collection
 
@@ -298,9 +265,6 @@ def orchestrate_search(
     if not question or not question.strip():
         raise ValueError("Question cannot be empty")
 
-    if provider not in ("openai", "google"):
-        raise ValueError(f'Invalid provider: "{provider}". Must be "openai" or "google".')
-
     if not db_url or not db_url.strip():
         raise ValueError("Database URL cannot be empty")
 
@@ -311,15 +275,15 @@ def orchestrate_search(
         logger.debug(f"Starting semantic search pipeline for question: {question[:50]}...")
 
         # Step 1: Generate embedding for question
-        question_embedding = query_embeddings(question, provider)
+        question_embedding = query_embeddings(question, ai_provider)
 
         # Step 2: Retrieve similar chunks
         retrieved_chunks = retrieve_similar_chunks(
-            question_embedding, db_url, collection_name, k=10
+            question_embedding, db_url, collection_name, ai_provider, k=10
         )
 
         # Step 3: Format context
-        context = format_context(retrieved_chunks)
+        context = format_context(retrieved_chunks)        
 
         logger.debug("✓ Semantic search pipeline completed successfully")
         return context

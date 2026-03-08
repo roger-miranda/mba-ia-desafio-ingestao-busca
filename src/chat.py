@@ -1,4 +1,5 @@
 from src.search import search_prompt
+from src.cli_parser import create_ai_provider_parser
 import logging
 import sys
 
@@ -10,20 +11,22 @@ logger = logging.getLogger(__name__)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
-def main():
+def main(ai_provider=None):
     """
     Main entry point for interactive CLI chat.
 
-    Initializes the search chain and runs an interactive loop where users
-    can ask questions and receive responses. Handles clean exit on 'quit' or 'exit'.
+    Args:
+        ai_provider: AI provider to use ('openai', 'google', 'mock', or None for config default)
     """
     try:
-        # Initialize the search chain
-        chain = search_prompt()
+        # Initialize and display provider information
+        from src.config import load_config
+        from src.providers import get_ai_provider
 
-        if not chain:
-            print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
-            sys.exit(1)
+        print("🤖 Initializing chat system...", flush=True)
+        config = load_config()
+        ai_provider_instance = get_ai_provider(ai_provider, config, use_fallback=True, log_selection=True)
+        print("", flush=True)  # Empty line for readability
 
         # Interactive chat loop
         while True:
@@ -41,7 +44,7 @@ def main():
 
                 # Process the question through the pipeline using search_prompt
                 try:
-                    response = chain(user_input)
+                    response = search_prompt(user_input, ai_provider_instance)
                     # Display response
                     print(f"Resposta:\n{response}\n")
 
@@ -67,5 +70,23 @@ def main():
         sys.exit(1)
 
 
+def parse_arguments():
+    """Parse command line arguments."""
+    examples = """
+Examples:
+  python -m src.chat                    # Use primary provider from config
+  python -m src.chat --ai openai        # Force OpenAI provider
+  python -m src.chat --ai google        # Force Google provider
+  python -m src.chat --ai mock          # Use mock provider for testing
+        """
+
+    parser = create_ai_provider_parser(
+        "Interactive chat with RAG-powered responses",
+        examples
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    main()
+    args = parse_arguments()
+    main(ai_provider=args.ai)

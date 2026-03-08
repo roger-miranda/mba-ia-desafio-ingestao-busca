@@ -9,9 +9,6 @@ This module provides utilities for:
 
 import logging
 from typing import Optional
-from src.config import load_config, get_active_provider
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,17 +29,17 @@ PERGUNTA DO USUÁRIO: {question}
 RESPOSTA:"""
 
 
-def generate_response(question: str, context: str, provider: str) -> str:
+def generate_response(question: str, context: str, ai_provider) -> str:
     """
     Generate LLM response using the context-only template.
 
-    Formats the prompt with the question and retrieved context, then calls the
-    specified LLM provider (OpenAI or Google) to generate a response.
+    Uses the AI provider abstraction to generate responses, ensuring consistency
+    across different LLM providers.
 
     Args:
         question: The user's question
         context: The retrieved context from semantic search (can be empty for out-of-scope)
-        provider: Either "openai" or "google" to specify which LLM provider to use
+        ai_provider: AI provider instance to use for response generation
 
     Returns:
         The LLM's generated response as a string
@@ -53,11 +50,7 @@ def generate_response(question: str, context: str, provider: str) -> str:
     if not question or not question.strip():
         raise ValueError("Question cannot be empty")
 
-    if provider not in ("openai", "google"):
-        raise ValueError(f'Invalid provider: "{provider}". Must be "openai" or "google".')
-
     try:
-        config = load_config()
 
         # Format the prompt with question and context
         if not context or not context.strip():
@@ -73,42 +66,13 @@ def generate_response(question: str, context: str, provider: str) -> str:
                 question=question
             )
 
-        # Create LLM instance based on provider
-        if provider == "openai":
-            # Create OpenAI chat model
-            openai_kwargs = {
-                "model": "gpt-3.5-turbo",
-                "temperature": 0.7,
-                "max_tokens": 500,
-                "api_key": config["OPENAI_API_KEY"],
-            }
-            if config.get("OPENAI_BASE_URL"):
-                openai_kwargs["base_url"] = config["OPENAI_BASE_URL"]
-
-            llm = ChatOpenAI(**openai_kwargs)
-        else:  # provider == "google"
-            # Create Google chat model
-            google_kwargs = {
-                "model": config.get("GOOGLE_LLM_MODEL", "gemini-pro"),
-                "temperature": 0.7,
-                "max_output_tokens": 500,
-                "google_api_key": config["GOOGLE_API_KEY"],
-            }
-            llm = ChatGoogleGenerativeAI(**google_kwargs)
-
-        logger.debug(f"Calling {provider} LLM with prompt (question length: {len(question)})")
+        logger.debug(f"Calling {ai_provider.get_provider_name()} LLM "
+                    f"({ai_provider.get_llm_model_name()}) with prompt "
+                    f"(question length: {len(question)})")
 
         # Call LLM with the formatted prompt as a system message
         from langchain_core.messages import HumanMessage
-        response = llm.invoke([HumanMessage(content=prompt)])
-
-        # Extract text from response
-        if hasattr(response, "content"):
-            response_text = response.content
-        elif isinstance(response, str):
-            response_text = response
-        else:
-            response_text = str(response)
+        response_text = ai_provider.invoke_llm([HumanMessage(content=prompt)])
 
         if not response_text or not response_text.strip():
             raise ValueError("LLM returned empty response")
@@ -117,12 +81,12 @@ def generate_response(question: str, context: str, provider: str) -> str:
         return response_text.strip()
 
     except Exception as e:
-        error_msg = f"Error generating response with {provider} LLM: {e}"
+        error_msg = f"Error generating response with {ai_provider.get_provider_name()} LLM: {e}"
         logger.error(error_msg)
         raise ValueError(error_msg) from e
 
 
-def orchestrate_response(question: str, context: str, provider: str) -> str:
+def orchestrate_response(question: str, context: str, ai_provider) -> str:
     """
     Wrapper function for consistent response generation interface.
 
@@ -132,7 +96,7 @@ def orchestrate_response(question: str, context: str, provider: str) -> str:
     Args:
         question: The user's question
         context: The retrieved context from semantic search
-        provider: Either "openai" or "google"
+        ai_provider: AI provider instance to use for response generation
 
     Returns:
         The final response to display to the user
@@ -143,14 +107,11 @@ def orchestrate_response(question: str, context: str, provider: str) -> str:
     if not question or not question.strip():
         raise ValueError("Question cannot be empty")
 
-    if provider not in ("openai", "google"):
-        raise ValueError(f'Invalid provider: "{provider}". Must be "openai" or "google".')
-
     try:
         logger.debug("Starting response generation orchestration")
 
         # Call generate_response with the provided context
-        response = generate_response(question, context, provider)
+        response = generate_response(question, context, ai_provider)
 
         logger.debug("✓ Response generation orchestration completed")
         return response

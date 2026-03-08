@@ -13,16 +13,11 @@ Usage:
 
 import sys
 import os
-import argparse
-from pathlib import Path
 from typing import Literal
 
-from src.config import (
-    load_config,
-    get_active_provider,
-    select_provider_with_fallback,
-    get_provider_info
-)
+from src.config import load_config
+from src.providers import get_ai_provider
+from src.cli_parser import create_ai_provider_parser
 from src.document_processor import (
     load_pdf_documents,
     chunk_documents,
@@ -61,29 +56,8 @@ def ingest_pdf(ai_provider: Literal["openai", "google", "mock", None] = None) ->
         database_url = config["DATABASE_URL"]
         collection_name = config["PG_VECTOR_COLLECTION_NAME"]
 
-        # Determine AI provider with fallback logic
-        if ai_provider is None:
-            # Use primary provider from config
-            preferred_provider = config["AI_PROVIDER_PRIMARY"]
-            print(f"📋 Using primary provider from config: {preferred_provider}", flush=True)
-        else:
-            preferred_provider = ai_provider
-            print(f"🎯 Using specified provider: {preferred_provider}", flush=True)
-
-        # Select provider with fallback
-        selected_provider, fallback_used = select_provider_with_fallback(preferred_provider)
-        provider_info = get_provider_info(selected_provider)
-
-        # Display provider information
-        if fallback_used:
-            print(f"⚠️  Primary provider '{preferred_provider}' unavailable, using fallback: {provider_info['name']}", flush=True)
-        else:
-            print(f"✅ Using AI provider: {provider_info['name']}", flush=True)
-
-        print(f"   Model: {provider_info['model']}", flush=True)
-        print(f"   Base URL: {provider_info['base_url']}", flush=True)
-        print(f"   Dimensions: {provider_info['dimensions']}", flush=True)
-        print(f"   Status: {'Available' if provider_info['available'] else 'Mock mode'}", flush=True)
+        # Resolve provider with complete fallback logic (logs internally)
+        ai_provider_instance = get_ai_provider(ai_provider, config, use_fallback=True, log_selection=True)
         print("", flush=True)  # Empty line for readability
 
         # Validate PDF file exists
@@ -108,16 +82,16 @@ def ingest_pdf(ai_provider: Literal["openai", "google", "mock", None] = None) ->
 
         # Step 3: Generate embeddings
         print(
-            f"🧠 Generating embeddings using {selected_provider} provider...",
+            f"🧠 Generating embeddings using {ai_provider_instance.get_provider_name()} provider...",
             flush=True,
         )
-        embeddings_data = generate_embeddings_batch(chunks, selected_provider)
+        embeddings_data = generate_embeddings_batch(chunks, ai_provider_instance)
         print(f"   ✓ Generated embeddings for {len(embeddings_data)} chunks", flush=True)
 
         # Step 4: Store in pgvector
         print("💾 Storing embeddings in PostgreSQL pgVector...", flush=True)
         count = store_embeddings_in_pgvector(
-            embeddings_data, database_url, collection_name
+            embeddings_data, database_url, collection_name, ai_provider_instance
         )
         print(f"   ✓ Stored {count} embeddings in pgvector", flush=True)
 
@@ -140,24 +114,18 @@ def ingest_pdf(ai_provider: Literal["openai", "google", "mock", None] = None) ->
 
 def parse_arguments():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Ingest PDF documents into vector database",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+    examples = """
 Examples:
   python -m src.ingest                    # Use primary provider from config
   python -m src.ingest --ai openai        # Force OpenAI provider
   python -m src.ingest --ai google        # Force Google provider
   python -m src.ingest --ai mock          # Use mock provider for testing
         """
-    )
 
-    parser.add_argument(
-        "--ai",
-        choices=["openai", "google", "mock"],
-        help="AI provider to use for embeddings (default: from config)"
+    parser = create_ai_provider_parser(
+        "Ingest PDF documents into vector database",
+        examples
     )
-
     return parser.parse_args()
 
 
