@@ -1,5 +1,7 @@
-TESTE DE CONSISTÊNCIA - 2026-03-08 15:44:16.410745
+TESTE DE CONSISTÊNCIA - 2026-03-08 16:05:53.713172
 ============================================================
+
+Quantidade de empresas testadas: 3
 
 1. Prime Imobiliária EPP
    Faturamento - Esperado: R$ 31.814.255,77
@@ -14,7 +16,7 @@ TESTE DE CONSISTÊNCIA - 2026-03-08 15:44:16.410745
    Faturamento - Obtido: O faturamento da empresa Brava Biotech Holding é de R$ 5.348.129,43....
    Faturamento - ✅
    Ano - Esperado: 2017
-   Ano - Obtido: A empresa Brava Biotech Holding foi fundada no ano de 2017....
+   Ano - Obtido: A empresa Brava Biotech Holding foi fundada em 2017....
    Ano - ✅
 
 3. Aurora Siderurgia Serviços
@@ -22,22 +24,6 @@ TESTE DE CONSISTÊNCIA - 2026-03-08 15:44:16.410745
    Faturamento - Obtido: O faturamento da empresa Aurora Siderurgia Serviços é de R$ 29.525.849,26....
    Faturamento - ✅
    Ano - Esperado: 1964
-   Ano - Obtido: A empresa Aurora Siderurgia Serviços foi fundada no ano de 1964....
-   Ano - ✅
-
-4. Solar Bebidas ME
-   Faturamento - Esperado: R$ 37.065.955,81
-   Faturamento - Obtido: O faturamento da empresa Solar Bebidas ME é de R$ 37.065.955,81....
-   Faturamento - ✅
-   Ano - Esperado: 1946
-   Ano - Obtido: A empresa Solar Bebidas ME foi fundada em 1946....
-   Ano - ✅
-
-5. Dourado Serviços ME
-   Faturamento - Esperado: R$ 3.084.657,83
-   Faturamento - Obtido: O faturamento da empresa Dourado Serviços ME é de R$ 3.084.657,83....
-   Faturamento - ✅
-   Ano - Esperado: 1995
-   Ano - Obtido: A empresa Dourado Serviços ME foi fundada em 1995....
+   Ano - Obtido: A empresa Aurora Siderurgia Serviços foi fundada em 1964....
    Ano - ✅
 

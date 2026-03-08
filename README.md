@@ -472,57 +472,67 @@ The system uses a strict system prompt that:
 
 ## Manual Testing & Consistency Validation
 
-The system includes comprehensive consistency testing tools to validate response accuracy across large datasets.
+The system includes comprehensive testing tools to validate response accuracy and system performance across different scenarios.
 
-### Consistency Test Script
+### Unified Test Script
 
-**Location:** `tests/manual/test_consistency_fixed.py`
+**Location:** `tests/manual/test_validation.py`
 
-This script tests the system's consistency by:
-- Extracting all companies from the database
-- Randomly selecting companies for testing
-- Validating responses for accuracy
-- Generating detailed performance reports
+A unified script that consolidates all testing capabilities:
 
-**Usage:**
+**Quick Validation Mode:**
 ```bash
-# Test 100 companies (default)
-python tests/manual/test_consistency_fixed.py
-
-# Test 1000 companies
-python tests/manual/test_consistency_fixed.py 1000
-
-# Test 50 companies (quick test)
-python tests/manual/test_consistency_fixed.py 50
+cd tests/manual
+python test_validation.py quick
 ```
+- Tests database connection
+- Validates basic search functionality
+- Tests 5 random companies
+- Fast system health check
+
+**Consistency Test Mode:**
+```bash
+# Test with different company counts
+python test_validation.py consistency 10      # 10 companies (development)
+python test_validation.py consistency 100     # 100 companies (default)
+python test_validation.py consistency 1000    # 1000 companies (production)
+```
+
+**Features:**
+- **Comprehensive Testing**: Validates both faturamento (revenue) and ano de fundação (foundation year)
+- **Automated Logging**: Saves detailed results to `tests/manual/logs/` with timestamps
+- **Performance Metrics**: Tracks response times and success rates
+- **Configurable Size**: Test any number of companies via command line parameter
+- **Reproducible Results**: Uses fixed seed (42) for consistent testing
 
 **Test Coverage:**
-- Faturamento (Revenue) validation
-- Ano de Fundação (Foundation Year) validation
-- Response consistency across multiple queries
-- Performance metrics and timing
+- Database connectivity validation
+- Search functionality verification
+- Company data accuracy (faturamento + ano)
+- Response time performance
+- Error handling and edge cases
 
-**Interpretation:**
-- **≥90%**: Excellent system consistency
-- **≥75%**: Good consistency, acceptable performance
-- **<75%**: Requires investigation and improvements
+**Results Interpretation:**
+- **≥90%**: 🎉 EXCELENTE! Sistema muito consistente
+- **≥75%**: ✅ BOM! Sistema razoavelmente consistente
+- **≥50%**: ⚠️ REGULAR. Sistema precisa melhorias
+- **<50%**: ❌ CRÍTICO! Sistema inconsistente
 
-**Output:** Generates detailed log file with test results, success rates, and failure analysis.
-
-**Example Results:**
+**Example Output:**
 ```
 📊 RESULTADOS FINAIS
+🎯 Taxa Sucesso Geral: 193/200 (96.5%)
 💰 Taxa Sucesso Faturamento: 95/100 (95.0%)
 📅 Taxa Sucesso Ano: 98/100 (98.0%)
-🎯 Taxa Sucesso Geral: 193/200 (96.5%)
-🎉 EXCELENTE! Sistema muito consistente!
+⏱️ Tempo Médio: 2.5s/pergunta
+📄 Log detalhado: logs/teste_consistencia_20260308_160553.txt
 ```
 
-### Additional Test Files
-
-- `tests/manual/` - Contains all manual testing scripts
-- Test logs are automatically saved with timestamp
-- Scripts use seed=42 for reproducible results
+**Log Files:**
+- Automatically saved in `tests/manual/logs/`
+- Include detailed per-company test results
+- Contain expected vs actual responses
+- Timestamp-based naming for easy tracking
 
 ---
 

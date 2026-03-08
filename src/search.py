@@ -1,3 +1,4 @@
+
 PROMPT_TEMPLATE = """
 CONTEXTO:
 {contexto}
@@ -27,11 +28,12 @@ RESPONDA A "PERGUNTA DO USUÁRIO"
 
 def search_prompt(user_question: str, ai_provider_instance=None) -> str:
     """
-    Execute the complete search and response pipeline.
+    Execute the complete search and response pipeline using the local PROMPT_TEMPLATE.
 
-    This function bridges the retrieval and LLM generation layers by orchestrating:
-    1. Semantic search to retrieve relevant chunks
-    2. LLM response generation based on retrieved context
+    This function:
+    1. Performs semantic search to retrieve relevant chunks
+    2. Uses the PROMPT_TEMPLATE defined in this module to generate responses
+    3. Ensures consistent rejection message for out-of-scope questions
 
     Args:
         user_question: The user's question to process
@@ -41,9 +43,9 @@ def search_prompt(user_question: str, ai_provider_instance=None) -> str:
         The final response text to display to the user
     """
     from src.retrieval import orchestrate_search
-    from src.llm_response import orchestrate_response
     from src.config import load_config
     from src.providers import get_ai_provider
+    from langchain_core.messages import HumanMessage
     import logging
 
     logger = logging.getLogger(__name__)
@@ -66,16 +68,26 @@ def search_prompt(user_question: str, ai_provider_instance=None) -> str:
             collection_name=collection_name
         )
 
-        # Step 2: Generate response from retrieved context
-        response = orchestrate_response(
-            question=user_question,
-            context=search_results,
-            ai_provider=ai_provider_instance
+        # Step 2: Format prompt using the template defined in this module
+        if not search_results or not search_results.strip():
+            context = "[NO CONTEXT AVAILABLE]"
+        else:
+            context = search_results
+
+        prompt = PROMPT_TEMPLATE.format(
+            contexto=context,
+            pergunta=user_question
         )
 
-        return response
+        # Step 3: Generate response using the AI provider directly
+        response = ai_provider_instance.invoke_llm([HumanMessage(content=prompt)])
+
+        if not response or not response.strip():
+            return "Não tenho informações necessárias para responder sua pergunta."
+
+        return response.strip()
 
     except Exception as e:
         logger.error(f"Error in search_prompt orchestration: {e}")
         # Return user-friendly error message
-        return f"Não tenho informações necessárias para responder sua pergunta."
+        return "Não tenho informações necessárias para responder sua pergunta."
