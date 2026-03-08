@@ -12,7 +12,7 @@ import sys
 
 # Import and initialize configuration
 try:
-    from src.config import load_config, get_active_provider, switch_provider
+    from src.config import load_config
 
     # Load config at package initialization time
     load_config()
@@ -25,4 +25,4 @@ except Exception as e:
     sys.exit(1)
 
 # Expose provider management functions for use by other modules
-__all__ = ["get_active_provider", "switch_provider"]
+__all__ = []
