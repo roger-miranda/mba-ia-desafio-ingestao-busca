@@ -16,10 +16,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### CLI e Interface
 
-- [ ] **CLI-01**: Sistema deve fornecer interface de chat via linha de comando
-- [ ] **CLI-02**: Sistema deve aceitar perguntas do usuário em loop interativo
-- [ ] **CLI-03**: Sistema deve exibir respostas formatadas no terminal
-- [ ] **CLI-04**: Sistema deve permitir sair do chat de forma limpa
+- [x] **CLI-01**: Sistema deve fornecer interface de chat via linha de comando
+- [x] **CLI-02**: Sistema deve aceitar perguntas do usuário em loop interativo
+- [x] **CLI-03**: Sistema deve exibir respostas formatadas no terminal
+- [x] **CLI-04**: Sistema deve permitir sair do chat de forma limpa
 
 ### Busca Vetorial
 
@@ -85,10 +85,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LLM-02 | Phase 3 | Complete (2026-03-08) |
 | LLM-03 | Phase 3 | Complete (2026-03-08) |
 | LLM-04 | Phase 3 | Complete (2026-03-08) |
-| CLI-01 | Phase 4 | Pending |
-| CLI-02 | Phase 4 | Pending |
-| CLI-03 | Phase 4 | Pending |
-| CLI-04 | Phase 4 | Pending |
+| CLI-01 | Phase 4 | Complete (2026-03-08) |
+| CLI-02 | Phase 4 | Complete (2026-03-08) |
+| CLI-03 | Phase 4 | Complete (2026-03-08) |
+| CLI-04 | Phase 4 | Complete (2026-03-08) |
 | DOC-01 | Phase 4 | Pending |
 | DOC-02 | Phase 4 | Pending |
 | DOC-03 | Phase 4 | Pending |
@@ -99,7 +99,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v1 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0
-- Completed: 16/25 (Phase 1 + Phase 2 + Phase 3)
+- Completed: 20/25 (Phase 1 + Phase 2 + Phase 3 + Phase 4 Plan 1)
 
 ---
 
