@@ -69,7 +69,7 @@ def query_embeddings(question: str, provider: str) -> List[float]:
         if not embedding_vector:
             raise ValueError("Failed to generate embedding for question")
 
-        logger.info(f"✓ Generated embedding for question ({len(embedding_vector)} dimensions)")
+        logger.debug(f"✓ Generated embedding for question ({len(embedding_vector)} dimensions)")
         return embedding_vector
 
     except Exception as e:
@@ -186,12 +186,12 @@ def retrieve_similar_chunks(
             cur.close()
             conn.close()
 
-            logger.info(f"✓ Retrieved {len(retrieved_chunks)} similar chunks from database")
+            logger.debug(f"✓ Retrieved {len(retrieved_chunks)} similar chunks from database")
             return retrieved_chunks
 
         except Exception as e:
             # Fallback: use similarity_search if direct query fails
-            logger.warning(f"Direct embedding search failed, using fallback: {e}")
+            logger.debug(f"Direct embedding search failed, using fallback: {e}")
             # This will search based on query string similarity
             results_with_scores = vectorstore.similarity_search_with_score("", k=k)
 
@@ -204,7 +204,7 @@ def retrieve_similar_chunks(
                 }
                 retrieved_chunks.append(chunk)
 
-            logger.info(f"✓ Retrieved {len(retrieved_chunks)} similar chunks (fallback method)")
+            logger.debug(f"✓ Retrieved {len(retrieved_chunks)} similar chunks (fallback method)")
             return retrieved_chunks
 
     except Exception as e:
@@ -262,7 +262,7 @@ def format_context(retrieved_chunks: List[Dict]) -> str:
         context = "\n\n".join(formatted_parts)
 
         if context:
-            logger.info(f"✓ Formatted context from {len(formatted_parts)} chunks")
+            logger.debug(f"✓ Formatted context from {len(formatted_parts)} chunks")
         else:
             logger.warning("Context is empty after formatting chunks")
 
@@ -308,7 +308,7 @@ def orchestrate_search(
         raise ValueError("Collection name cannot be empty")
 
     try:
-        logger.info(f"Starting semantic search pipeline for question: {question[:50]}...")
+        logger.debug(f"Starting semantic search pipeline for question: {question[:50]}...")
 
         # Step 1: Generate embedding for question
         question_embedding = query_embeddings(question, provider)
@@ -321,7 +321,7 @@ def orchestrate_search(
         # Step 3: Format context
         context = format_context(retrieved_chunks)
 
-        logger.info("✓ Semantic search pipeline completed successfully")
+        logger.debug("✓ Semantic search pipeline completed successfully")
         return context
 
     except Exception as e:

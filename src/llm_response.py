@@ -96,7 +96,7 @@ def generate_response(question: str, context: str, provider: str) -> str:
             }
             llm = ChatGoogleGenerativeAI(**google_kwargs)
 
-        logger.info(f"Calling {provider} LLM with prompt (question length: {len(question)})")
+        logger.debug(f"Calling {provider} LLM with prompt (question length: {len(question)})")
 
         # Call LLM with the formatted prompt as a system message
         from langchain_core.messages import HumanMessage
@@ -113,7 +113,7 @@ def generate_response(question: str, context: str, provider: str) -> str:
         if not response_text or not response_text.strip():
             raise ValueError("LLM returned empty response")
 
-        logger.info(f"✓ Generated response ({len(response_text)} characters)")
+        logger.debug(f"✓ Generated response ({len(response_text)} characters)")
         return response_text.strip()
 
     except Exception as e:
@@ -147,12 +147,12 @@ def orchestrate_response(question: str, context: str, provider: str) -> str:
         raise ValueError(f'Invalid provider: "{provider}". Must be "openai" or "google".')
 
     try:
-        logger.info("Starting response generation orchestration")
+        logger.debug("Starting response generation orchestration")
 
         # Call generate_response with the provided context
         response = generate_response(question, context, provider)
 
-        logger.info("✓ Response generation orchestration completed")
+        logger.debug("✓ Response generation orchestration completed")
         return response
 
     except Exception as e:

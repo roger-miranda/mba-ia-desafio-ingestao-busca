@@ -6,6 +6,9 @@ import sys
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Silence httpx request logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 
 def main():
     """
