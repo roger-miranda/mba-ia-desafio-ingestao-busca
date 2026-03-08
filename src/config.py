@@ -7,14 +7,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Required environment variables for the system to function
+# At least one of GOOGLE_API_KEY or OPENAI_API_KEY must be provided
 REQUIRED_VARS = [
-    "GOOGLE_API_KEY",
-    "OPENAI_API_KEY",
     "DATABASE_URL",
     "PG_VECTOR_COLLECTION_NAME",
     "PDF_PATH",
     "GOOGLE_EMBEDDING_MODEL",
     "OPENAI_EMBEDDING_MODEL",
+]
+
+# At least one of these provider API keys must be configured
+PROVIDER_VARS = [
+    "GOOGLE_API_KEY",
+    "OPENAI_API_KEY",
 ]
 
 # Global configuration dictionary
@@ -49,6 +54,16 @@ def load_config() -> Dict:
             f"Missing required environment variables:\n"
             f"  {', '.join(missing_vars)}\n\n"
             f"Please set these variables in your .env file or environment."
+        )
+        raise ValueError(error_msg)
+
+    # Check that at least one provider API key is configured
+    provider_keys = [os.getenv(var, "").strip() for var in PROVIDER_VARS]
+    if not any(provider_keys):
+        error_msg = (
+            f"At least one API key must be configured:\n"
+            f"  - GOOGLE_API_KEY or OPENAI_API_KEY\n\n"
+            f"Please set at least one in your .env file or environment."
         )
         raise ValueError(error_msg)
 
