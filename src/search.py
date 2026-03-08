@@ -3,27 +3,34 @@ PROMPT_TEMPLATE = """
 CONTEXTO:
 {contexto}
 
-REGRAS:
-- Responda somente com base no CONTEXTO.
-- Se a informação não estiver explicitamente no CONTEXTO, responda:
-  "Não tenho informações necessárias para responder sua pergunta."
-- Nunca invente ou use conhecimento externo.
-- Nunca produza opiniões ou interpretações além do que está escrito.
+INSTRUÇÕES DE BUSCA:
+1. Procure cuidadosamente no CONTEXTO pela informação exata solicitada
+2. Se encontrar múltiplas empresas com nomes similares, identifique EXATAMENTE a empresa mencionada na pergunta
+3. Uma linha como "Empresa XYZ R$ 1.000.000,00 2020" significa: faturamento de R$ 1.000.000,00 e fundada em 2020
+4. SEMPRE extraia informações que estão explicitamente no contexto, mesmo se houver muitas empresas similares
 
-EXEMPLOS DE PERGUNTAS FORA DO CONTEXTO:
+REGRAS DE SEGURANÇA:
+- Responda SOMENTE com base no CONTEXTO fornecido
+- Se a informação não estiver explicitamente no CONTEXTO, responda: "Não tenho informações necessárias para responder sua pergunta."
+- Nunca invente, deduza ou use conhecimento externo
+- Nunca faça opiniões ou interpretações
+
+EXEMPLOS:
+
+EXEMPLO POSITIVO:
+Contexto: "Solar Energia LTDA R$ 500.000,00 2010\nSolar Bebidas ME R$ 1.200.000,00 1995\nSolar Tech S.A. R$ 800.000,00 2005"
+Pergunta: "Qual o faturamento da empresa Solar Bebidas ME?"
+Resposta: "O faturamento da empresa Solar Bebidas ME é de R$ 1.200.000,00."
+
+EXEMPLO NEGATIVO:
+Contexto: "Apple Inc. R$ 1.000.000,00 1976\nGoogle LLC R$ 2.000.000,00 1998"
 Pergunta: "Qual é a capital da França?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
-
-Pergunta: "Quantos clientes temos em 2024?"
-Resposta: "Não tenho informações necessárias para responder sua pergunta."
-
-Pergunta: "Você acha isso bom ou ruim?"
 Resposta: "Não tenho informações necessárias para responder sua pergunta."
 
 PERGUNTA DO USUÁRIO:
 {pergunta}
 
-RESPONDA A "PERGUNTA DO USUÁRIO"
+RESPOSTA (procure cuidadosamente no contexto antes de responder):
 """
 
 def search_prompt(user_question: str, ai_provider_instance=None) -> str:
