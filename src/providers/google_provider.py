@@ -26,7 +26,7 @@ class GoogleProvider(AiProvider):
 
     def _validate_config(self) -> None:
         """Validate Google configuration."""
-        required_keys = ["GOOGLE_API_KEY", "GOOGLE_EMBEDDING_MODEL"]
+        required_keys = ["GOOGLE_API_KEY", "GOOGLE_EMBEDDING_MODEL", "GOOGLE_LLM_MODEL"]
         for key in required_keys:
             if key not in self.config:
                 raise ValueError(f"Missing required Google configuration: {key}")

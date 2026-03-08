@@ -26,7 +26,7 @@ class OpenAiProvider(AiProvider):
 
     def _validate_config(self) -> None:
         """Validate OpenAI configuration."""
-        required_keys = ["OPENAI_API_KEY", "OPENAI_EMBEDDING_MODEL"]
+        required_keys = ["OPENAI_API_KEY", "OPENAI_EMBEDDING_MODEL", "OPENAI_LLM_MODEL"]
         for key in required_keys:
             if key not in self.config:
                 raise ValueError(f"Missing required OpenAI configuration: {key}")

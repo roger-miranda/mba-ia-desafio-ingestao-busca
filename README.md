@@ -32,9 +32,29 @@ Before installation, ensure you have the following:
 
 ---
 
-## Installation
+## Quick Start with Makefile 🚀
 
-Follow these step-by-step instructions to set up the project:
+**NEW: Automated Setup Available!** Use our Makefile for easier project management.
+
+### Option A: Automated Setup (Recommended)
+
+```bash
+# 1. Quick setup (creates venv, installs deps, copies .env)
+make setup
+
+# 2. Edit .env file with your API keys
+nano .env  # or your preferred editor
+
+# 3. Complete quick start (database + ingestion)
+make quick-start
+
+# 4. Start chatting!
+make chat
+```
+
+### Option B: Manual Setup (Traditional)
+
+Follow these step-by-step instructions to set up the project manually:
 
 **Step 1: Clone or extract the project**
 ```bash
@@ -89,13 +109,109 @@ nano .env
 
 Edit the `.env` file and replace placeholders with your actual keys:
 ```bash
+# OpenAI Configuration (optional)
 OPENAI_API_KEY=sk-your-actual-key-here
-# OR (at least one API key is required)
-GOOGLE_API_KEY=your-actual-google-api-key
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_LLM_MODEL=gpt-5-nano
 
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rag_db
-COLLECTION_NAME=pdf_documents
+# Google Configuration (optional - at least one provider required)
+GOOGLE_API_KEY=your-actual-google-api-key
+GOOGLE_EMBEDDING_MODEL=models/embedding-001
+GOOGLE_LLM_MODEL=gemini-2.5-flash-lite
+
+# Database and Document Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rag
+PG_VECTOR_COLLECTION_NAME=documents
 PDF_PATH=document.pdf
+
+# AI Provider Selection
+AI_PROVIDER_PRIMARY=openai
+```
+
+---
+
+## Makefile Commands Reference 📋
+
+The project includes a comprehensive Makefile that simplifies all operations. Here are the main command categories:
+
+### System Management
+```bash
+make help                    # Show all available commands with descriptions
+make status                  # Check system status (venv, .env, database, PDF)
+make requirements           # Show system requirements and versions
+```
+
+### Environment Setup
+```bash
+make setup                  # Complete initial setup (venv + dependencies + .env)
+make venv                   # Create Python virtual environment
+make install-deps          # Install Python dependencies
+make setup-env             # Copy .env.example to .env
+make clean-env             # Remove virtual environment
+```
+
+### Database Operations
+```bash
+make start-db              # Start PostgreSQL with pgVector using Docker
+make stop-db               # Stop PostgreSQL container
+make restart-db            # Restart PostgreSQL container
+make db-status            # Check database container status
+make db-clean             # Remove database container and volumes (DESTRUCTIVE)
+```
+
+### Application Operations
+```bash
+make ingest               # Run PDF ingestion pipeline
+make chat                 # Start interactive chat interface
+make quick-start         # Complete quick start (setup + db + ingest)
+```
+
+### Testing Operations
+```bash
+make test-quick                    # Run quick validation test (5 companies)
+make test-consistency             # Run consistency test (100 companies)
+make test-consistency-small       # Run small consistency test (10 companies)
+make test-consistency-large       # Run large consistency test (1000 companies)
+make test-logs                    # Show recent test logs
+```
+
+### Development & Maintenance
+```bash
+make clean-cache          # Remove Python cache files
+make clean-logs          # Remove test logs
+make clean-all           # Clean everything (cache, logs, db, venv)
+make lint                # Run code linting (if flake8 installed)
+make format              # Format code with black (if installed)
+```
+
+### Common Workflows
+
+**First-time setup:**
+```bash
+make setup               # Initial setup
+# Edit .env with your API keys
+make quick-start        # Start everything
+```
+
+**Daily development:**
+```bash
+make status             # Check what's running
+make start-db          # Start database if needed
+make chat              # Start chatting
+```
+
+**Testing workflow:**
+```bash
+make test-quick        # Quick validation
+make test-consistency  # Full consistency check
+make test-logs         # Review results
+```
+
+**Maintenance:**
+```bash
+make clean-cache       # Clean Python cache
+make db-status         # Check database health
+make clean-all         # Complete cleanup
 ```
 
 ---
@@ -106,7 +222,12 @@ PDF_PATH=document.pdf
 
 The system uses PostgreSQL with pgVector extension for efficient semantic search. Docker handles the entire setup automatically.
 
-**Start the database service:**
+**Option A: Using Makefile (Recommended)**
+```bash
+make start-db
+```
+
+**Option B: Manual Command**
 ```bash
 docker-compose up -d
 ```
@@ -136,10 +257,15 @@ The `.env` file contains critical configuration:
 | Variable | Example | Purpose |
 |----------|---------|---------|
 | `OPENAI_API_KEY` | `sk-...` | OpenAI API authentication |
+| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | OpenAI model for generating embeddings |
+| `OPENAI_LLM_MODEL` | `gpt-5-nano` | OpenAI model for answering questions |
 | `GOOGLE_API_KEY` | `AIzaSy...` | Google Generative AI authentication |
+| `GOOGLE_EMBEDDING_MODEL` | `models/embedding-001` | Google model for generating embeddings |
+| `GOOGLE_LLM_MODEL` | `gemini-2.5-flash-lite` | Google model for answering questions |
 | `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/rag_db` | PostgreSQL connection string |
-| `COLLECTION_NAME` | `pdf_documents` | Vector collection name in pgVector |
+| `PG_VECTOR_COLLECTION_NAME` | `documents` | Vector collection name in pgVector |
 | `PDF_PATH` | `document.pdf` | Path to PDF file (relative or absolute) |
+| `AI_PROVIDER_PRIMARY` | `openai` | Primary AI provider to use (`openai` or `google`) |
 
 **Important Notes:**
 - The system requires **at least one API key** (OpenAI OR Google)
@@ -161,6 +287,13 @@ cp /path/to/your/document.pdf ./document.pdf
 ```
 
 **Step 2: Run the ingest pipeline**
+
+**Option A: Using Makefile (Recommended)**
+```bash
+make ingest
+```
+
+**Option B: Manual Command**
 ```bash
 python -m src.ingest
 ```
@@ -197,6 +330,13 @@ Ready for queries
 Once data ingestion is complete, you can start the interactive chat interface.
 
 **Start the chat CLI:**
+
+**Option A: Using Makefile (Recommended)**
+```bash
+make chat
+```
+
+**Option B: Manual Command**
 ```bash
 python -m src.chat
 ```
@@ -365,11 +505,11 @@ The system uses a strict system prompt that:
 
 **Solution:**
 1. Verify Docker is running: `docker --version`
-2. Check PostgreSQL container is started: `docker-compose up -d`
+2. Check PostgreSQL container is started: `make start-db` (or `docker-compose up -d`)
 3. Wait 5-10 seconds for PostgreSQL to initialize (first startup is slower)
-4. Verify container is healthy: `docker ps | grep postgres` (should show "postgres" in NAMES)
+4. Check database status: `make db-status` (or `docker ps | grep postgres`)
 5. Check database connectivity: `psql postgresql://postgres:postgres@localhost:5432/rag_db -c "SELECT 1"`
-6. If still failing, restart the container: `docker-compose restart`
+6. If still failing, restart the container: `make restart-db` (or `docker-compose restart`)
 
 ### Issue: "API key invalid" or "Authentication failed"
 
@@ -410,7 +550,7 @@ The system uses a strict system prompt that:
 **Symptom:** All questions return "Desculpe, a pergunta está fora do escopo..." regardless of content
 
 **Solution:**
-1. Verify ingest was completed successfully: Run `python -m src.ingest` again
+1. Verify ingest was completed successfully: Run `make ingest` (or `python -m src.ingest`) again
 2. Check PostgreSQL contains data:
    ```bash
    docker exec postgres_db_1 psql -U postgres -d rag_db \
@@ -481,6 +621,13 @@ The system includes comprehensive testing tools to validate response accuracy an
 A unified script that consolidates all testing capabilities:
 
 **Quick Validation Mode:**
+
+**Option A: Using Makefile (Recommended)**
+```bash
+make test-quick
+```
+
+**Option B: Manual Command**
 ```bash
 cd tests/manual
 python test_validation.py quick
@@ -491,8 +638,18 @@ python test_validation.py quick
 - Fast system health check
 
 **Consistency Test Mode:**
+
+**Option A: Using Makefile (Recommended)**
+```bash
+make test-consistency-small    # 10 companies (development)
+make test-consistency          # 100 companies (default)
+make test-consistency-large    # 1000 companies (production)
+```
+
+**Option B: Manual Commands**
 ```bash
 # Test with different company counts
+cd tests/manual
 python test_validation.py consistency 10      # 10 companies (development)
 python test_validation.py consistency 100     # 100 companies (default)
 python test_validation.py consistency 1000    # 1000 companies (production)
@@ -533,6 +690,64 @@ python test_validation.py consistency 1000    # 1000 companies (production)
 - Include detailed per-company test results
 - Contain expected vs actual responses
 - Timestamp-based naming for easy tracking
+- View recent logs with: `make test-logs`
+
+---
+
+## Makefile Benefits & Tips 💡
+
+### Why Use the Makefile?
+
+- **🎯 Simplified Commands**: Replace complex multi-step operations with single commands
+- **🔍 Built-in Validation**: Automatically checks prerequisites before running operations
+- **🎨 Colored Output**: Clear visual feedback with colored status messages
+- **🛡️ Error Prevention**: Validates environment, database status, and dependencies
+- **📊 System Status**: Quick `make status` shows complete system health
+- **🧹 Easy Cleanup**: Simple commands for maintenance and cleanup
+
+### Pro Tips
+
+**Check system status first:**
+```bash
+make status              # Always start here to see what's needed
+```
+
+**Use help when in doubt:**
+```bash
+make help               # Shows all commands with descriptions
+```
+
+**Quick development workflow:**
+```bash
+make status             # Check what's running
+make start-db          # Start database if needed
+make ingest            # Re-ingest if PDF changed
+make chat              # Start chatting
+```
+
+**Troubleshooting workflow:**
+```bash
+make status            # Check system status
+make db-status         # Check database specifically
+make clean-cache       # Clear Python cache if issues
+make restart-db        # Restart database if needed
+```
+
+**Testing workflow:**
+```bash
+make test-quick        # Quick health check
+make test-consistency  # Full validation
+make test-logs         # Review results
+```
+
+### Command Shortcuts
+
+Most used commands:
+- `make setup` → Complete initial setup
+- `make quick-start` → Start everything after setup
+- `make status` → Check system health
+- `make chat` → Start the chat interface
+- `make help` → When you need guidance
 
 ---
 
@@ -557,6 +772,27 @@ Project structure reference:
 
 ---
 
-**Last Updated:** 2026-03-08
+**Last Updated:** 2026-03-08 - Added comprehensive Makefile integration
 
 For the latest information, check the project repository or documentation.
+
+### Quick Reference Card
+
+```bash
+# Essential Commands (most commonly used)
+make setup              # Initial setup
+make quick-start        # Complete startup
+make status            # Check system health
+make chat              # Start chatting
+make help              # Show all commands
+
+# Database Management
+make start-db          # Start database
+make stop-db           # Stop database
+make db-status         # Check database
+
+# Testing
+make test-quick        # Quick validation
+make test-consistency  # Full consistency test
+make test-logs         # View test results
+```

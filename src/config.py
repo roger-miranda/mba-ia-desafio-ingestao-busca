@@ -14,6 +14,8 @@ REQUIRED_VARS = [
     "PDF_PATH",
     "GOOGLE_EMBEDDING_MODEL",
     "OPENAI_EMBEDDING_MODEL",
+    "GOOGLE_LLM_MODEL",
+    "OPENAI_LLM_MODEL",
     "AI_PROVIDER_PRIMARY",
 ]
 
@@ -77,6 +79,8 @@ def load_config() -> Dict:
         "PDF_PATH": os.getenv("PDF_PATH"),
         "GOOGLE_EMBEDDING_MODEL": os.getenv("GOOGLE_EMBEDDING_MODEL"),
         "OPENAI_EMBEDDING_MODEL": os.getenv("OPENAI_EMBEDDING_MODEL"),
+        "GOOGLE_LLM_MODEL": os.getenv("GOOGLE_LLM_MODEL"),
+        "OPENAI_LLM_MODEL": os.getenv("OPENAI_LLM_MODEL"),
         "AI_PROVIDER_PRIMARY": os.getenv("AI_PROVIDER_PRIMARY"),
         "OPENAI_BASE_URL": os.getenv("OPENAI_BASE_URL"),
         "GOOGLE_BASE_URL": os.getenv("GOOGLE_BASE_URL"),
