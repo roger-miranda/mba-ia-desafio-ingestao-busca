@@ -74,7 +74,10 @@ Plan list:
 4. LLM generates response using template that enforces context-only answers without external knowledge
 5. Questions outside document scope are rejected with message "Não tenho informações necessárias para responder sua pergunta."
 
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plan list:
+- [ ] 03-01-PLAN.md — Semantic search retrieval module, LLM response generation with context-only template, integration testing
 
 ---
 
@@ -91,7 +94,7 @@ Plan list:
 3. User can cleanly exit chat with 'quit' or 'exit' command without errors
 4. README.md contains complete documentation: installation steps, environment setup, Docker Compose commands, ingest execution, chat usage, and example questions
 
-**Plans:** TBD
+**Plans:** To be planned (depends on Phase 3 completion)
 
 ---
 
