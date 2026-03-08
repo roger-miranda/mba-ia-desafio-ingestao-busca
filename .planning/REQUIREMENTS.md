@@ -23,17 +23,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Busca Vetorial
 
-- [ ] **SEARCH-01**: Sistema deve vetorizar pergunta do usuário usando mesmo modelo dos embeddings
-- [ ] **SEARCH-02**: Sistema deve buscar 10 resultados mais relevantes (k=10) usando similarity_search_with_score
-- [ ] **SEARCH-03**: Sistema deve concatenar resultados do banco para formar contexto
-- [ ] **SEARCH-04**: Sistema deve montar prompt específico com contexto recuperado
+- [x] **SEARCH-01**: Sistema deve vetorizar pergunta do usuário usando mesmo modelo dos embeddings
+- [x] **SEARCH-02**: Sistema deve buscar 10 resultados mais relevantes (k=10) usando similarity_search_with_score
+- [x] **SEARCH-03**: Sistema deve concatenar resultados do banco para formar contexto
+- [x] **SEARCH-04**: Sistema deve montar prompt específico com contexto recuperado
 
 ### LLM e Respostas
 
-- [ ] **LLM-01**: Sistema deve usar template de prompt específico fornecido com regras rígidas
-- [ ] **LLM-02**: Sistema deve chamar LLM (OpenAI ou Google) com prompt montado
-- [ ] **LLM-03**: Sistema deve retornar resposta baseada apenas no contexto do PDF
-- [ ] **LLM-04**: Sistema deve rejeitar perguntas fora do contexto com "Não tenho informações necessárias para responder sua pergunta."
+- [x] **LLM-01**: Sistema deve usar template de prompt específico fornecido com regras rígidas
+- [x] **LLM-02**: Sistema deve chamar LLM (OpenAI ou Google) com prompt montado
+- [x] **LLM-03**: Sistema deve retornar resposta baseada apenas no contexto do PDF
+- [x] **LLM-04**: Sistema deve rejeitar perguntas fora do contexto com "Não tenho informações necessárias para responder sua pergunta."
 
 ### Estrutura e Configuração
 
@@ -77,14 +77,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INGEST-02 | Phase 2 | Complete (2026-03-08) |
 | INGEST-03 | Phase 2 | Complete (2026-03-08) |
 | INGEST-04 | Phase 2 | Complete (2026-03-08) |
-| SEARCH-01 | Phase 3 | Pending |
-| SEARCH-02 | Phase 3 | Pending |
-| SEARCH-03 | Phase 3 | Pending |
-| SEARCH-04 | Phase 3 | Pending |
-| LLM-01 | Phase 3 | Pending |
-| LLM-02 | Phase 3 | Pending |
-| LLM-03 | Phase 3 | Pending |
-| LLM-04 | Phase 3 | Pending |
+| SEARCH-01 | Phase 3 | Complete (2026-03-08) |
+| SEARCH-02 | Phase 3 | Complete (2026-03-08) |
+| SEARCH-03 | Phase 3 | Complete (2026-03-08) |
+| SEARCH-04 | Phase 3 | Complete (2026-03-08) |
+| LLM-01 | Phase 3 | Complete (2026-03-08) |
+| LLM-02 | Phase 3 | Complete (2026-03-08) |
+| LLM-03 | Phase 3 | Complete (2026-03-08) |
+| LLM-04 | Phase 3 | Complete (2026-03-08) |
 | CLI-01 | Phase 4 | Pending |
 | CLI-02 | Phase 4 | Pending |
 | CLI-03 | Phase 4 | Pending |
@@ -99,11 +99,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v1 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0
-- Completed: 8/25 (Phase 1 + Phase 2)
+- Completed: 16/25 (Phase 1 + Phase 2 + Phase 3)
 
 ---
 
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after Phase 2 completion*
+*Last updated: 2026-03-08 after Phase 3 completion*
 *Phase 1 requirements (4/4): COMPLETE*
 *Phase 2 requirements (4/4): COMPLETE*
+*Phase 3 requirements (8/8): COMPLETE*
