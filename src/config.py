@@ -14,6 +14,7 @@ REQUIRED_VARS = [
     "PDF_PATH",
     "GOOGLE_EMBEDDING_MODEL",
     "OPENAI_EMBEDDING_MODEL",
+    "AI_PROVIDER_PRIMARY",
 ]
 
 # At least one of these provider API keys must be configured
@@ -76,20 +77,18 @@ def load_config() -> Dict:
         "PDF_PATH": os.getenv("PDF_PATH"),
         "GOOGLE_EMBEDDING_MODEL": os.getenv("GOOGLE_EMBEDDING_MODEL"),
         "OPENAI_EMBEDDING_MODEL": os.getenv("OPENAI_EMBEDDING_MODEL"),
+        "AI_PROVIDER_PRIMARY": os.getenv("AI_PROVIDER_PRIMARY"),
+        "OPENAI_BASE_URL": os.getenv("OPENAI_BASE_URL"),
+        "GOOGLE_BASE_URL": os.getenv("GOOGLE_BASE_URL"),
         "ACTIVE_PROVIDER": _active_provider,
     }
 
-    # Determine primary provider: default to OPENAI if both exist
-    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
-    google_key = os.getenv("GOOGLE_API_KEY", "").strip()
+    # Determine primary provider from config
+    primary_provider = os.getenv("AI_PROVIDER_PRIMARY", "openai").strip().lower()
+    if primary_provider not in ("openai", "google"):
+        primary_provider = "openai"  # Default fallback
 
-    if openai_key:
-        _active_provider = "openai"
-    elif google_key:
-        _active_provider = "google"
-    else:
-        _active_provider = "openai"  # Default even if not set (will be caught above)
-
+    _active_provider = primary_provider
     _config["ACTIVE_PROVIDER"] = _active_provider
 
     return _config
@@ -128,6 +127,129 @@ def switch_provider(provider_name: Literal["openai", "google"]) -> None:
     _active_provider = provider_name
     if _config:
         _config["ACTIVE_PROVIDER"] = _active_provider
+
+
+def is_provider_available(provider: Literal["openai", "google", "mock"]) -> bool:
+    """
+    Check if a provider is available (has valid API key).
+
+    Args:
+        provider: Provider name ("openai", "google", or "mock")
+
+    Returns:
+        True if provider is available, False otherwise
+    """
+    if provider == "mock":
+        return True
+
+    config = _config or load_config()
+
+    if provider == "openai":
+        key = config.get("OPENAI_API_KEY", "").strip()
+        return key and key != ""
+    elif provider == "google":
+        key = config.get("GOOGLE_API_KEY", "").strip()
+        return key and key != ""
+
+    return False
+
+
+def select_provider_with_fallback(
+    preferred_provider: Literal["openai", "google", "mock"]
+) -> tuple[Literal["openai", "google", "mock"], bool]:
+    """
+    Select a provider with intelligent fallback logic.
+
+    Args:
+        preferred_provider: The preferred provider ("openai", "google", or "mock")
+
+    Returns:
+        Tuple of (selected_provider, fallback_used)
+
+    Raises:
+        ValueError: If no suitable provider is available (mock is never used as fallback)
+    """
+    # If mock is requested, use it directly
+    if preferred_provider == "mock":
+        return ("mock", False)
+
+    # Check if preferred provider is available
+    if is_provider_available(preferred_provider):
+        return (preferred_provider, False)
+
+    # Try fallback (but never to mock)
+    fallback_provider = "google" if preferred_provider == "openai" else "openai"
+
+    if is_provider_available(fallback_provider):
+        return (fallback_provider, True)
+
+    # No suitable provider available
+    available_providers = []
+    if is_provider_available("openai"):
+        available_providers.append("openai")
+    if is_provider_available("google"):
+        available_providers.append("google")
+
+    if available_providers:
+        available_str = ", ".join(available_providers)
+        error_msg = (
+            f'Preferred provider "{preferred_provider}" is not available. '
+            f'Available providers: {available_str}. '
+            f'Please configure API keys or use --ai with an available provider.'
+        )
+    else:
+        error_msg = (
+            f'No AI providers are available. '
+            f'Please configure OPENAI_API_KEY and/or GOOGLE_API_KEY in your .env file, '
+            f'or use --ai mock for testing.'
+        )
+
+    raise ValueError(error_msg)
+
+
+def get_provider_info(provider: Literal["openai", "google", "mock"]) -> dict:
+    """
+    Get information about a provider.
+
+    Args:
+        provider: Provider name
+
+    Returns:
+        Dictionary with provider information
+    """
+    config = _config or load_config()
+
+    if provider == "mock":
+        return {
+            "name": "Mock",
+            "model": "mock-embeddings",
+            "dimensions": 768,  # Default mock dimensions
+            "available": True,
+            "base_url": "N/A",
+            "description": "Mock provider for testing"
+        }
+    elif provider == "openai":
+        base_url = config.get("OPENAI_BASE_URL")
+        return {
+            "name": "OpenAI",
+            "model": config.get("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
+            "dimensions": 1536,  # OpenAI embedding dimensions
+            "available": is_provider_available("openai"),
+            "base_url": base_url if base_url else "https://api.openai.com/v1 (default)",
+            "description": "OpenAI Embeddings API" + (" (Custom URL)" if base_url else "")
+        }
+    elif provider == "google":
+        base_url = config.get("GOOGLE_BASE_URL")
+        return {
+            "name": "Google",
+            "model": config.get("GOOGLE_EMBEDDING_MODEL", "models/embedding-001"),
+            "dimensions": 768,  # Google embedding dimensions
+            "available": is_provider_available("google"),
+            "base_url": base_url if base_url else "https://generativelanguage.googleapis.com (default)",
+            "description": "Google Generative AI Embeddings" + (" (Custom URL)" if base_url else "")
+        }
+
+    return {}
 
 
 # Load configuration on module import

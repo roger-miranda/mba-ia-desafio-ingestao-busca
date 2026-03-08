@@ -44,11 +44,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Documentação
 
-- [ ] **DOC-01**: README.md deve conter descrição completa sobre como executar e usar o software
-- [ ] **DOC-02**: README.md deve incluir comandos de instalação das dependências
-- [ ] **DOC-03**: README.md deve incluir comandos de build/setup do ambiente
-- [ ] **DOC-04**: README.md deve incluir comandos de execução (ingestão e chat)
-- [ ] **DOC-05**: README.md deve incluir exemplos de uso e perguntas
+- [x] **DOC-01**: README.md deve conter descrição completa sobre como executar e usar o software
+- [x] **DOC-02**: README.md deve incluir comandos de instalação das dependências
+- [x] **DOC-03**: README.md deve incluir comandos de build/setup do ambiente
+- [x] **DOC-04**: README.md deve incluir comandos de execução (ingestão e chat)
+- [x] **DOC-05**: README.md deve incluir exemplos de uso e perguntas
 
 ## Out of Scope
 
@@ -89,11 +89,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-02 | Phase 4 | Complete (2026-03-08) |
 | CLI-03 | Phase 4 | Complete (2026-03-08) |
 | CLI-04 | Phase 4 | Complete (2026-03-08) |
-| DOC-01 | Phase 4 | Pending |
-| DOC-02 | Phase 4 | Pending |
-| DOC-03 | Phase 4 | Pending |
-| DOC-04 | Phase 4 | Pending |
-| DOC-05 | Phase 4 | Pending |
+| DOC-01 | Phase 4 | Complete |
+| DOC-02 | Phase 4 | Complete |
+| DOC-03 | Phase 4 | Complete |
+| DOC-04 | Phase 4 | Complete |
+| DOC-05 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total

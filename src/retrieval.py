@@ -139,7 +139,7 @@ def retrieve_similar_chunks(
         vectorstore = PGVector(
             collection_name=collection_name,
             connection=db_url,
-            embedding_function=embedding_function,
+            embeddings=embedding_function,
         )
 
         # Perform similarity search with scores

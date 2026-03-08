@@ -18,16 +18,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # System prompt template that enforces context-only responses
-SYSTEM_PROMPT_TEMPLATE = """Você é um assistente especializado em consultar documentos PDF.
+SYSTEM_PROMPT_TEMPLATE = """Você é um assistente que responde perguntas com base em dados de empresas de um documento PDF.
 
-INSTRUÇÃO CRÍTICA: Responda APENAS com base no contexto fornecido abaixo.
-Se a pergunta não pode ser respondida com o contexto, responda EXATAMENTE com:
-"Não tenho informações necessárias para responder sua pergunta."
+IMPORTANTE: Use APENAS as informações do contexto abaixo para responder.
+Se a pergunta não puder ser respondida com os dados fornecidos, diga:
+"Não tenho informações suficientes para responder sua pergunta."
 
-CONTEXTO:
+DADOS DISPONÍVEIS:
 {context}
 
-PERGUNTA: {question}"""
+PERGUNTA DO USUÁRIO: {question}
+
+RESPOSTA:"""
 
 
 def generate_response(question: str, context: str, provider: str) -> str:
@@ -96,8 +98,9 @@ def generate_response(question: str, context: str, provider: str) -> str:
 
         logger.info(f"Calling {provider} LLM with prompt (question length: {len(question)})")
 
-        # Call LLM with the formatted prompt
-        response = llm.invoke(prompt)
+        # Call LLM with the formatted prompt as a system message
+        from langchain_core.messages import HumanMessage
+        response = llm.invoke([HumanMessage(content=prompt)])
 
         # Extract text from response
         if hasattr(response, "content"):
