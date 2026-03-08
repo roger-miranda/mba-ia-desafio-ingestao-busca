@@ -76,7 +76,7 @@ Plan list:
 4. ✓ LLM generates response using template that enforces context-only answers without external knowledge
 5. ✓ Questions outside document scope are rejected with message "Não tenho informações necessárias para responder sua pergunta."
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plan list:
 - [x] 03-01-PLAN.md — Semantic search retrieval module, LLM response generation with context-only template, integration testing (COMPLETE)
@@ -96,7 +96,11 @@ Plan list:
 3. User can cleanly exit chat with 'quit' or 'exit' command without errors
 4. README.md contains complete documentation: installation steps, environment setup, Docker Compose commands, ingest execution, chat usage, and example questions
 
-**Plans:** To be planned (depends on Phase 3 completion)
+**Plans:** 2 plans
+
+Plan list:
+- [ ] 04-01-PLAN.md — Implement search_prompt orchestrator and interactive CLI loop (CLI-01 through CLI-04)
+- [ ] 04-02-PLAN.md — Write comprehensive README.md documentation (DOC-01 through DOC-05)
 
 ---
 
@@ -106,7 +110,7 @@ Plan list:
 |-------|----------------|--------|-----------|
 | 1. Setup & Configuration | 1/1 | COMPLETE | 2026-03-08 |
 | 2. Data Ingestion Pipeline | 1/1 | COMPLETE | 2026-03-08 |
-| 3. Retrieval & Generation Pipeline | 1/1 | COMPLETE | 2026-03-08 |
+| 3. Retrieval & Generation Pipeline | 1/1 | Complete    | 2026-03-08 |
 | 4. CLI Interface & Documentation | 0/? | Not started | - |
 
 **Overall Progress:** 3/4 phases complete (75%)
