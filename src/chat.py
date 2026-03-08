@@ -1,7 +1,4 @@
 from src.search import search_prompt
-from src.retrieval import orchestrate_search
-from src.llm_response import orchestrate_response
-from src.config import load_config, get_active_provider
 import logging
 import sys
 
@@ -25,16 +22,6 @@ def main():
             print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
             sys.exit(1)
 
-        # Load configuration for database and provider info
-        try:
-            config = load_config()
-            provider = get_active_provider()
-            db_url = config.get("DATABASE_URL")
-            collection_name = config.get("PG_VECTOR_COLLECTION_NAME")
-        except ValueError as e:
-            print(f"Erro ao carregar configuração: {e}")
-            sys.exit(1)
-
         # Interactive chat loop
         while True:
             try:
@@ -49,22 +36,9 @@ def main():
                 if not user_input:
                     continue
 
-                # Process the question through the pipeline
+                # Process the question through the pipeline using search_prompt
                 try:
-                    # Use the orchestrators directly for better control
-                    search_results = orchestrate_search(
-                        question=user_input,
-                        provider=provider,
-                        db_url=db_url,
-                        collection_name=collection_name
-                    )
-
-                    response = orchestrate_response(
-                        question=user_input,
-                        context=search_results,
-                        provider=provider
-                    )
-
+                    response = chain(user_input)
                     # Display response
                     print(f"Resposta:\n{response}\n")
 
