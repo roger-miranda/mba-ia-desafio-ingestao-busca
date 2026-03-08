@@ -255,12 +255,8 @@ def orchestrate_search(
 
         # Step 2: Retrieve similar chunks
         retrieved_chunks = retrieve_similar_chunks(
-            question_embedding, db_url, collection_name, ai_provider, k=35
+            question_embedding, db_url, collection_name, ai_provider, k=10
         )
-
-        print(f"✓ Retrieved {len(retrieved_chunks)} relevant chunks from database")
-        for chunk in retrieved_chunks:
-            print(f"   - Chunk score: {chunk['score']:.4f}, text preview: {chunk['text'][:50]}...")  
 
         # Step 3: Format context
         context = format_context(retrieved_chunks)

@@ -470,6 +470,62 @@ The system uses a strict system prompt that:
 
 ---
 
+## Manual Testing & Consistency Validation
+
+The system includes comprehensive consistency testing tools to validate response accuracy across large datasets.
+
+### Consistency Test Script
+
+**Location:** `tests/manual/test_consistency_fixed.py`
+
+This script tests the system's consistency by:
+- Extracting all companies from the database
+- Randomly selecting companies for testing
+- Validating responses for accuracy
+- Generating detailed performance reports
+
+**Usage:**
+```bash
+# Test 100 companies (default)
+python tests/manual/test_consistency_fixed.py
+
+# Test 1000 companies
+python tests/manual/test_consistency_fixed.py 1000
+
+# Test 50 companies (quick test)
+python tests/manual/test_consistency_fixed.py 50
+```
+
+**Test Coverage:**
+- Faturamento (Revenue) validation
+- Ano de Fundação (Foundation Year) validation
+- Response consistency across multiple queries
+- Performance metrics and timing
+
+**Interpretation:**
+- **≥90%**: Excellent system consistency
+- **≥75%**: Good consistency, acceptable performance
+- **<75%**: Requires investigation and improvements
+
+**Output:** Generates detailed log file with test results, success rates, and failure analysis.
+
+**Example Results:**
+```
+📊 RESULTADOS FINAIS
+💰 Taxa Sucesso Faturamento: 95/100 (95.0%)
+📅 Taxa Sucesso Ano: 98/100 (98.0%)
+🎯 Taxa Sucesso Geral: 193/200 (96.5%)
+🎉 EXCELENTE! Sistema muito consistente!
+```
+
+### Additional Test Files
+
+- `tests/manual/` - Contains all manual testing scripts
+- Test logs are automatically saved with timestamp
+- Scripts use seed=42 for reproducible results
+
+---
+
 ## Support & Additional Resources
 
 For issues not covered above:

@@ -14,12 +14,38 @@ from typing import Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# System prompt template that enforces context-only responses
-SYSTEM_PROMPT_TEMPLATE = """Você é um assistente que responde perguntas com base em dados de empresas de um documento PDF.
+"""
+LLM response generation module with context-based template.
 
-IMPORTANTE: Use APENAS as informações do contexto abaixo para responder.
-Se a pergunta não puder ser respondida com os dados fornecidos, diga:
-"Não tenho informações suficientes para responder sua pergunta."
+This module provides utilities for:
+- Formatting prompts with intelligent context interpretation
+- Calling LLM providers (OpenAI or Google) with optimized template
+- Generating context-aware responses based on available data
+"""
+
+import logging
+from typing import Optional
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Final system prompt template - explicit about tabular data recognition
+SYSTEM_PROMPT_TEMPLATE = """Você é um assistente que responde perguntas sobre dados de empresas de um documento PDF.
+
+IMPORTANTE: Use APENAS as informações presentes no contexto abaixo.
+
+INSTRUÇÕES PARA DADOS TABULARES:
+- Os dados estão no formato: "Nome da Empresa R$ Valor Ano"
+- Se você vir uma linha com esses três elementos, considere como dados válidos
+- Exemplo: "Pacto IA LTDA R$ 1.206.483.117,54 2013" = empresa válida com faturamento e ano
+- Para perguntas sobre faturamento: procure a linha da empresa e extraia o valor R$
+- Para perguntas sobre ano: procure a linha da empresa e extraia o ano
+- Para listas de empresas: liste apenas as que estão explicitamente no contexto
+
+REGRA DE REJEIÇÃO:
+- SOMENTE rejeite se a empresa específica NÃO aparecer no contexto
+- Se a empresa aparecer no contexto, use os dados da linha correspondente
 
 DADOS DISPONÍVEIS:
 {context}
@@ -27,6 +53,7 @@ DADOS DISPONÍVEIS:
 PERGUNTA DO USUÁRIO: {question}
 
 RESPOSTA:"""
+
 
 
 def generate_response(question: str, context: str, ai_provider) -> str:
