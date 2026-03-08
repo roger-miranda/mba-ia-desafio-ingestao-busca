@@ -37,10 +37,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Estrutura e Configuração
 
-- [ ] **STRUCT-01**: Sistema deve seguir estrutura obrigatória especificada (src/, requirements.txt, docker-compose.yml, etc.)
-- [ ] **STRUCT-02**: Sistema deve incluir document.pdf na raiz para ingestão
-- [ ] **CONFIG-01**: Sistema deve usar configuração via .env para API keys e parâmetros
-- [ ] **CONFIG-02**: Sistema deve validar variáveis de ambiente necessárias
+- [x] **STRUCT-01**: Sistema deve seguir estrutura obrigatória especificada (src/, requirements.txt, docker-compose.yml, etc.)
+- [x] **STRUCT-02**: Sistema deve incluir document.pdf na raiz para ingestão
+- [x] **CONFIG-01**: Sistema deve usar configuração via .env para API keys e parâmetros
+- [x] **CONFIG-02**: Sistema deve validar variáveis de ambiente necessárias
 
 ### Documentação
 
@@ -69,10 +69,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STRUCT-01 | Phase 1 | Pending |
-| STRUCT-02 | Phase 1 | Pending |
-| CONFIG-01 | Phase 1 | Pending |
-| CONFIG-02 | Phase 1 | Pending |
+| STRUCT-01 | Phase 1 | Complete (2026-03-08) |
+| STRUCT-02 | Phase 1 | Complete (2026-03-08) |
+| CONFIG-01 | Phase 1 | Complete (2026-03-08) |
+| CONFIG-02 | Phase 1 | Complete (2026-03-08) |
 | INGEST-01 | Phase 2 | Pending |
 | INGEST-02 | Phase 2 | Pending |
 | INGEST-03 | Phase 2 | Pending |
@@ -103,4 +103,5 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after roadmap creation*
+*Last updated: 2026-03-08 after Phase 1 completion*
+*Phase 1 requirements (4/4): COMPLETE*
