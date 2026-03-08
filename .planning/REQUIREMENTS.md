@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Ingestão PDF
 
-- [ ] **INGEST-01**: Sistema deve carregar PDF do arquivo document.pdf usando PyPDFLoader
-- [ ] **INGEST-02**: Sistema deve dividir PDF em chunks de 1000 caracteres com overlap de 150 usando RecursiveCharacterTextSplitter
-- [ ] **INGEST-03**: Sistema deve gerar embeddings para cada chunk usando OpenAI ou Google Generative AI
-- [ ] **INGEST-04**: Sistema deve armazenar vetores no PostgreSQL com pgVector usando PGVector do LangChain
+- [x] **INGEST-01**: Sistema deve carregar PDF do arquivo document.pdf usando PyPDFLoader
+- [x] **INGEST-02**: Sistema deve dividir PDF em chunks de 1000 caracteres com overlap de 150 usando RecursiveCharacterTextSplitter
+- [x] **INGEST-03**: Sistema deve gerar embeddings para cada chunk usando OpenAI ou Google Generative AI
+- [x] **INGEST-04**: Sistema deve armazenar vetores no PostgreSQL com pgVector usando PGVector do LangChain
 
 ### CLI e Interface
 
@@ -73,10 +73,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STRUCT-02 | Phase 1 | Complete (2026-03-08) |
 | CONFIG-01 | Phase 1 | Complete (2026-03-08) |
 | CONFIG-02 | Phase 1 | Complete (2026-03-08) |
-| INGEST-01 | Phase 2 | Pending |
-| INGEST-02 | Phase 2 | Pending |
-| INGEST-03 | Phase 2 | Pending |
-| INGEST-04 | Phase 2 | Pending |
+| INGEST-01 | Phase 2 | Complete (2026-03-08) |
+| INGEST-02 | Phase 2 | Complete (2026-03-08) |
+| INGEST-03 | Phase 2 | Complete (2026-03-08) |
+| INGEST-04 | Phase 2 | Complete (2026-03-08) |
 | SEARCH-01 | Phase 3 | Pending |
 | SEARCH-02 | Phase 3 | Pending |
 | SEARCH-03 | Phase 3 | Pending |
@@ -99,9 +99,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v1 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0
+- Completed: 8/25 (Phase 1 + Phase 2)
 
 ---
 
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after Phase 1 completion*
+*Last updated: 2026-03-08 after Phase 2 completion*
 *Phase 1 requirements (4/4): COMPLETE*
+*Phase 2 requirements (4/4): COMPLETE*
