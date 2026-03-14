@@ -44,7 +44,7 @@ class GoogleProvider(AiProvider):
         # Initialize LLM model
         llm_kwargs = {
             "model": self.config.get("GOOGLE_LLM_MODEL", "gemini-pro"),
-            "temperature": self.config.get("GOOGLE_TEMPERATURE", 0.7),
+            "temperature": self.config.get("GOOGLE_TEMPERATURE", 0),
             "max_output_tokens": self.config.get("GOOGLE_MAX_TOKENS", 500),
             "google_api_key": self.config["GOOGLE_API_KEY"],
         }

@@ -5,10 +5,15 @@ Implements the AiProvider interface using OpenAI's API through LangChain.
 """
 
 from typing import List, Dict, Any
+import httpx
+import warnings
 from langchain_core.messages import BaseMessage
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
 from .base import AiProvider
+
+# Suppress SSL verification warnings for corporate proxies
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 
 class OpenAiProvider(AiProvider):
@@ -33,10 +38,14 @@ class OpenAiProvider(AiProvider):
 
     def _initialize_models(self) -> None:
         """Initialize OpenAI models."""
+        # Create HTTP client that doesn't verify SSL (for corporate proxies)
+        http_client = httpx.Client(verify=False)
+        
         # Initialize embeddings model
         openai_kwargs = {
             "model": self.config["OPENAI_EMBEDDING_MODEL"],
             "api_key": self.config["OPENAI_API_KEY"],
+            "http_client": http_client,
         }
         if self.config.get("OPENAI_BASE_URL"):
             openai_kwargs["base_url"] = self.config["OPENAI_BASE_URL"]
@@ -46,9 +55,10 @@ class OpenAiProvider(AiProvider):
         # Initialize LLM model
         llm_kwargs = {
             "model": self.config.get("OPENAI_LLM_MODEL", "gpt-3.5-turbo"),
-            "temperature": self.config.get("OPENAI_TEMPERATURE", 0.7),
+            "temperature": self.config.get("OPENAI_TEMPERATURE", 0),
             "max_tokens": self.config.get("OPENAI_MAX_TOKENS", 500),
             "api_key": self.config["OPENAI_API_KEY"],
+            "http_client": http_client,
         }
         if self.config.get("OPENAI_BASE_URL"):
             llm_kwargs["base_url"] = self.config["OPENAI_BASE_URL"]

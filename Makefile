@@ -2,8 +2,8 @@
 # Sistema RAG para Consulta de Documentos PDF
 
 # Variables
-PYTHON := python
-PIP := pip
+PYTHON := python3
+PIP := pip3
 VENV_DIR := venv
 DOCKER_COMPOSE := docker-compose
 SRC_DIR := src
